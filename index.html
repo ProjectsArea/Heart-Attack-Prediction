@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heart Attack Risk Prediction</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <div class="container">
+    <h1>🩺 Heart Attack Risk Predictor</h1>
+    <p>Enter your health details below to check your risk level.</p>
+
+    <form action="/predict" method="POST" class="prediction-form">
+
+      <label>Age:</label>
+      <input type="number" name="age" placeholder="Enter age" step="1" required>
+
+      <label>Gender:</label>
+      <select name="gender" required>
+        <option value="">Select</option>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+
+      <label>Smoking Status:</label>
+      <select name="smoking" required>
+        <option value="">Select</option>
+        <option>Never</option>
+        <option>Occasionally</option>
+        <option>Regularly</option>
+      </select>
+
+      <label>Alcohol Consumption:</label>
+      <select name="alcohol" required>
+        <option value="">Select</option>
+        <option>Never</option>
+        <option>Occasionally</option>
+        <option>Regularly</option>
+      </select>
+
+      <label>ECG Results:</label>
+      <select name="ecg" required>
+        <option value="">Select</option>
+        <option>Normal</option>
+        <option>Abnormal</option>
+        <option>Borderline</option>
+      </select>
+
+      <label>SpO₂ (%):</label>
+      <input type="number" name="spo2" placeholder="Enter oxygen level (e.g., 95)" step="0.1" required>
+
+      <label>Blood Pressure (mmHg):</label>
+      <input type="text" name="bp" placeholder="e.g., 120/80" required>
+
+      <button type="submit" class="btn">Predict Risk</button>
+    </form>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
