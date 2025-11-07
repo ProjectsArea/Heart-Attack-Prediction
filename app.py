@@ -2,11 +2,12 @@ import joblib
 import numpy as np
 import pandas as pd
 import requests
-from flask import Flask, render_template, request
+import time
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# ---------------- Load Model and Preprocessors ----------------
+# ---------------- Load Model ----------------
 try:
     model = joblib.load("models/heart_attack_model_rf.joblib")
     scaler = joblib.load("models/scaler_rf.joblib")
@@ -14,106 +15,105 @@ try:
     y_encoder = joblib.load("models/y_encoder_rf.joblib")
     threshold = joblib.load("models/threshold_rf.joblib")
     model_features = model.feature_names_in_
-
-    print("✅ Model, Scaler, Encoders, and Threshold loaded successfully.")
-    print("Model features:", model_features)
+    print("✅ Model loaded successfully.")
 except Exception as e:
-    print("⚠️ Error loading model or encoders:", e)
+    print("⚠️ Model loading error:", e)
 
 
-# ---------------- Home Route ----------------
+# ---------------- IoT Fetch Route ----------------
+@app.route('/fetch_iot_data')
+def fetch_iot_data():
+    try:
+        api_url = "https://api.thingspeak.com/channels/3102827/feeds.json?results=2"
+        response = requests.get(api_url).json()
+        feeds = response.get("feeds", [])
+        if not feeds:
+            return jsonify({"status": "no_data"})
+
+        last_entry = feeds[-1]
+        last_time = last_entry["created_at"]
+        spo2 = float(last_entry.get("field2", 0))
+        heart_rate = float(last_entry.get("field1", 0))
+
+        # Wait for potential new reading
+        time.sleep(15)
+        new_response = requests.get(api_url).json()
+        new_last = new_response["feeds"][-1]["created_at"]
+
+        if new_last == last_time:
+            return jsonify({"status": "finger_not_found"})
+
+        return jsonify({"status": "ok", "spo2": spo2, "heart_rate": heart_rate})
+    except Exception as e:
+        print("IoT Error:", e)
+        return jsonify({"status": "error"})
+
+
+# ---------------- Routes ----------------
 @app.route('/')
 def home():
     return render_template('home.html')
 
-
-# ---------------- Form Route ----------------
 @app.route('/form')
 def form():
     return render_template('form.html')
 
 
-# ---------------- Prediction Route ----------------
+# ---------------- Prediction ----------------
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        use_iot = request.form.get('use_iot')  # Checkbox for IoT integration
+        use_iot = request.form.get('use_iot')
+        heart_rate = request.form.get('heart_rate')
 
-        # If IoT data is selected, fetch latest values from ThingSpeak
-        if use_iot == "on":
-            print("📡 Fetching IoT data from ThingSpeak...")
-            api_url = "https://api.thingspeak.com/channels/3102827/feeds.json?results=2"
-            response = requests.get(api_url)
-            data = response.json()
-            latest_feed = data["feeds"][-1]
-            heart_rate = float(latest_feed["field1"]) if latest_feed["field1"] else 0.0
-            spo2 = float(latest_feed["field2"]) if latest_feed["field2"] else 0.0
-            print(f"💓 IoT Heart Rate: {heart_rate}, SpO₂: {spo2}")
-        else:
-            heart_rate = None
-            spo2 = None
-
-        # Get other form inputs
         age = float(request.form['age'])
         gender = request.form['gender']
         smoking = request.form['smoking']
         alcohol = request.form['alcohol']
         ecg = request.form['ecg']
-        spo2 = spo2 if spo2 is not None else float(request.form['spo2'])
+        spo2 = float(request.form['spo2'])
         bp = request.form['bp']
 
-        # Split blood pressure into systolic/diastolic
+        # Split BP
         try:
             systolic, diastolic = map(float, bp.split('/'))
         except:
-            systolic, diastolic = 120.0, 80.0  # fallback
+            systolic, diastolic = 120.0, 80.0
 
-        # Build DataFrame with correct model features
         df = pd.DataFrame(np.zeros((1, len(model_features))), columns=model_features)
 
-        # Fill in the user + IoT data
-        df['Age'] = age
-        df['Gender'] = gender
-        df['Smoking Status'] = smoking
-        df['Alcohol Consumption'] = alcohol
-        df['ECG Results'] = ecg
-        df['Blood Oxygen Levels (SpO2%)'] = spo2
-        df['BP_Systolic'] = systolic
-        df['BP_Diastolic'] = diastolic
+        for col in df.columns:
+            if col == "Age": df[col] = age
+            elif col == "Gender": df[col] = gender
+            elif col == "Smoking Status": df[col] = smoking
+            elif col == "Alcohol Consumption": df[col] = alcohol
+            elif col == "ECG Results": df[col] = ecg
+            elif col == "Blood Oxygen Levels (SpO2%)": df[col] = spo2
+            elif col == "BP_Systolic": df[col] = systolic
+            elif col == "BP_Diastolic": df[col] = diastolic
+            elif "Heart Rate" in col and heart_rate:
+                df[col] = float(heart_rate)
 
-        # Label encode categorical features
         for col in df.columns:
             if col in label_encoders:
                 le = label_encoders[col]
-                if df[col].iloc[0] not in le.classes_:
-                    df[col] = le.transform([le.classes_[0]])
-                else:
-                    df[col] = le.transform(df[col])
+                df[col] = le.transform([df[col].iloc[0] if df[col].iloc[0] in le.classes_ else le.classes_[0]])
 
-        # Scale numeric features
         df_scaled = scaler.transform(df)
-
-        # Predict probability
         proba = model.predict_proba(df_scaled)[0][1]
         risk = "High Risk" if proba >= threshold else "Low Risk"
 
-        print(f"✅ Prediction: {risk} ({proba * 100:.2f}%)")
+        # if manual entry (no IoT used)
+        if use_iot != "on":
+            return render_template('result.html', result="Finger not found", manual_result=risk)
 
-        return render_template(
-            'result.html',
-            result=risk,
-            probability=round(proba * 100, 2)
-        )
+        # IoT normal case
+        return render_template('result.html', result=risk)
 
     except Exception as e:
-        print("❌ Error during prediction:", e)
-        return render_template(
-            'result.html',
-            result="Error",
-            probability=str(e)
-        )
+        print("❌ Prediction error:", e)
+        return render_template('result.html', result="Error", probability=str(e))
 
 
-# ---------------- Run App ----------------
 if __name__ == '__main__':
     app.run(debug=True)
