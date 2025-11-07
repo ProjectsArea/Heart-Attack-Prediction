@@ -5,14 +5,97 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Heart Attack Risk Prediction</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    body {
+      background-color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #1f2937;
+      text-align: center;
+    }
+
+    p {
+      text-align: center;
+      color: #4b5563;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      margin-top: 0.25rem;
+    }
+
+    .iot-section {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .finger-message {
+      display: none;
+      text-align: center;
+      font-weight: 600;
+      color: #2563eb;
+      margin-top: 0.75rem;
+    }
+
+    .countdown {
+      display: none;
+      text-align: center;
+      margin-top: 0.5rem;
+      font-weight: bold;
+      color: #ef4444;
+    }
+
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      margin-top: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
+
 <body>
 
   <div class="container">
     <h1>🩺 Heart Attack Risk Predictor</h1>
     <p>Enter your health details below to check your risk level.</p>
 
-    <form action="/predict" method="POST" class="prediction-form">
+    <form id="predictionForm" action="/predict" method="POST" class="prediction-form">
 
       <label>Age:</label>
       <input type="number" name="age" placeholder="Enter age" step="1" required>
@@ -51,13 +134,58 @@
       <label>SpO₂ (%):</label>
       <input type="number" name="spo2" placeholder="Enter oxygen level (e.g., 95)" step="0.1" required>
 
+      <label>Heart Rate (bpm):</label>
+      <input type="number" name="heartrate" placeholder="Enter heart rate (bpm)" step="1" required>
+
       <label>Blood Pressure (mmHg):</label>
       <input type="text" name="bp" placeholder="e.g., 120/80" required>
+
+      <!-- ✅ IoT Integration -->
+      <div class="iot-section">
+        <label>
+          <input type="checkbox" id="use_iot" name="use_iot">
+          Use IoT Sensor (ThingSpeak)
+        </label>
+        <p class="finger-message" id="fingerMessage">🖐️ Please insert your finger on the IoT sensor...</p>
+        <p class="countdown" id="countdownText">Waiting: <span id="timer">15</span> seconds</p>
+      </div>
 
       <button type="submit" class="btn">Predict Risk</button>
     </form>
   </div>
 
-  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script>
+    const checkbox = document.getElementById("use_iot");
+    const fingerMsg = document.getElementById("fingerMessage");
+    const countdownText = document.getElementById("countdownText");
+    const timerSpan = document.getElementById("timer");
+    let countdown;
+
+    checkbox.addEventListener("change", function() {
+      if (this.checked) {
+        fingerMsg.style.display = "block";
+        countdownText.style.display = "block";
+
+        let timeLeft = 15;
+        timerSpan.textContent = timeLeft;
+
+        countdown = setInterval(() => {
+          timeLeft--;
+          timerSpan.textContent = timeLeft;
+
+          if (timeLeft <= 0) {
+            clearInterval(countdown);
+            countdownText.style.display = "none";
+            fingerMsg.textContent = "⏳ No new data received. Enter again or add details manually.";
+          }
+        }, 1000);
+      } else {
+        clearInterval(countdown);
+        fingerMsg.style.display = "none";
+        countdownText.style.display = "none";
+      }
+    });
+  </script>
+
 </body>
 </html>
