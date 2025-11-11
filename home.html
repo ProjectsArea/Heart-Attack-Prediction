@@ -4,17 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HeartGuard - Heart Attack Risk Assessment</title>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Custom CSS -->
     <style>
-        /* --- Keep all your existing custom CSS exactly the same --- */
         :root {
             --primary: #4A90E2;
             --secondary: #6C63FF;
@@ -37,25 +41,14 @@
             align-items: center;
         }
 
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .card {
+        .card, .card-hover {
             border: none;
             border-radius: 1rem;
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
         }
 
-        .card:hover {
+        .card:hover, .card-hover:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
         }
@@ -94,44 +87,68 @@
             color: var(--secondary) !important;
         }
 
-        @media (max-width: 768px) {
-            .hero-bg {
-                height: auto !important;
-                padding: 6rem 0;
-            }
-
-            .display-3 {
-                font-size: 2.5rem;
-            }
-
-            .btn-lg {
-                padding: 0.75rem 1.5rem;
-                font-size: 1rem;
-            }
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' ...");
+            opacity: 0.7;
+            z-index: 0;
         }
 
-        .hero-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            transition: all 0.3s ease;
         }
 
-        .hero-image:hover {
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #eff6ff;
+            color: #1d4ed8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
             transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(29, 78, 216, 0.1);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
+        @media (max-width: 768px) {
+            .hero-bg { height: auto !important; padding: 6rem 0; }
+            .display-3 { font-size: 2.5rem; }
+            .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
         }
     </style>
 </head>
+
 <body style="font-family: 'Poppins', sans-serif;">
-    <!-- Navigation -->
+
+    <!-- ✅ Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="/">
                 <i class="fas fa-heartbeat text-danger fs-3 me-2"></i>
                 <span class="h4 mb-0 fw-bold text-primary">HeartGuard</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#navbarNav" aria-controls="navbarNav" 
+                    aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -141,7 +158,7 @@
                     <li class="nav-item"><a class="nav-link" href="/#how-it-works">How It Works</a></li>
                     <li class="nav-item"><a class="nav-link" href="/#about">About</a></li>
 
-                    <!-- ✅ NEW NAV ITEM for Health Monitor -->
+                    <!-- ✅ New Health Monitor link -->
                     <li class="nav-item">
                         <a class="nav-link text-primary fw-semibold" href="/monitor">
                             <i class="fas fa-chart-line me-1"></i> Health Monitor
@@ -158,38 +175,136 @@
         </div>
     </nav>
 
-    <!-- Existing content below (unchanged) -->
     <div style="padding-top: 76px;"></div>
-    <div class="position-relative">
-        <div class="hero-bg" style="background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://img.freepik.com/free-photo/doctor-with-stethoscope-hands-hospital-background_1423-1.jpg') no-repeat center center/cover; min-height: 80vh;">
-            <div class="container h-100">
-                <div class="row h-100 align-items-center">
-                    <div class="col-lg-8 mx-auto text-center text-white" data-aos="fade-up">
-                        <h1 class="display-3 fw-bold mb-4">Take Control of Your <span class="text-info">Heart Health</span></h1>
-                        <p class="lead mb-5">Assess your heart attack risk in minutes with our AI-powered tool. Get personalized insights and take the first step towards a healthier heart.</p>
-                        <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
-                            <a href="/form" class="btn btn-info btn-lg px-4 py-3 fw-bold text-white">
-                                <i class="fas fa-heartbeat me-2"></i> Check Your Risk Now
-                            </a>
-                            <a href="#how-it-works" class="btn btn-outline-light btn-lg px-4 py-3">
-                                <i class="fas fa-play-circle me-2"></i> How It Works
-                            </a>
-                        </div>
+
+    <!-- Hero Section -->
+    <div class="hero-bg" style="background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://img.freepik.com/free-photo/doctor-with-stethoscope-hands-hospital-background_1423-1.jpg') no-repeat center center/cover; min-height: 80vh;">
+        <div class="container h-100">
+            <div class="row h-100 align-items-center">
+                <div class="col-lg-8 mx-auto text-center text-white" data-aos="fade-up">
+                    <h1 class="display-3 fw-bold mb-4">Take Control of Your <span class="text-info">Heart Health</span></h1>
+                    <p class="lead mb-5">Assess your heart attack risk in minutes with our AI-powered tool. Get personalized insights and take the first step towards a healthier heart.</p>
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                        <a href="/form" class="btn btn-info btn-lg px-4 py-3 fw-bold text-white">
+                            <i class="fas fa-heartbeat me-2"></i> Check Your Risk Now
+                        </a>
+                        <a href="#how-it-works" class="btn btn-outline-light btn-lg px-4 py-3">
+                            <i class="fas fa-play-circle me-2"></i> How It Works
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- All other content (Stats, How It Works, CTA, Footer, Scripts) remains unchanged -->
-    <!-- ... (Your full existing content continues here) ... -->
+    <!-- Stats -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4 text-center">
+                <div class="col-md-4" data-aos="fade-up">
+                    <div class="p-4 bg-white rounded-3 shadow-sm h-100">
+                        <div class="display-4 fw-bold text-info mb-2">95%</div>
+                        <h3 class="h5">Accuracy Rate</h3>
+                        <p class="text-muted mb-0">Precise heart health assessment</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="p-4 bg-white rounded-3 shadow-sm h-100">
+                        <div class="display-4 fw-bold text-info mb-2">2 min</div>
+                        <h3 class="h5">Assessment Time</h3>
+                        <p class="text-muted mb-0">Quick and easy evaluation</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="p-4 bg-white rounded-3 shadow-sm h-100">
+                        <div class="display-4 fw-bold text-info mb-2">24/7</div>
+                        <h3 class="h5">Available</h3>
+                        <p class="text-muted mb-0">Access your health insights anytime</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Bootstrap JS & FontAwesome -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- How It Works Section -->
+    <section class="py-8 py-lg-12" id="how-it-works">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="badge bg-info bg-opacity-10 text-info px-4 py-2 rounded-pill mb-3">Process</span>
+                <h2 class="display-5 fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted mb-5">A simple, three-step process to understand your heart health better</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                        <img src="https://img.freepik.com/free-vector/medical-form-concept-illustration_114360-1004.jpg" class="card-img-top" alt="Form">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon"><i class="fas fa-clipboard-list fa-2x"></i></div>
+                            <h3 class="h4">Complete the Form</h3>
+                            <p class="text-muted">Answer a few questions about your health metrics and habits.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                        <img src="https://img.freepik.com/free-vector/artificial-intelligence-concept-illustration_114360-1003.jpg" class="card-img-top" alt="AI">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon"><i class="fas fa-brain fa-2x"></i></div>
+                            <h3 class="h4">AI Analysis</h3>
+                            <p class="text-muted">Advanced algorithms analyze your data against known risk factors.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                        <img src="https://img.freepik.com/premium-vector/exam-results-document-illustration_212005-46.jpg" class="card-img-top" alt="Results">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon"><i class="fas fa-chart-line fa-2x"></i></div>
+                            <h3 class="h4">Get Your Results</h3>
+                            <p class="text-muted">Receive a detailed risk assessment and personalized recommendations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-8 py-lg-12">
+        <div class="container">
+            <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
+                <div class="row g-0">
+                    <div class="col-md-6 bg-primary text-white p-5 d-flex flex-column justify-content-center">
+                        <h2 class="display-6 fw-bold mb-4">Take the First Step Towards a Healthier Heart</h2>
+                        <p class="lead mb-0">Join thousands of users improving their heart health.</p>
+                    </div>
+                    <div class="col-md-6 bg-light d-flex align-items-center p-5 text-center">
+                        <div class="w-100">
+                            <h3 class="h4 mb-4">Start Your Assessment</h3>
+                            <a href="/form" class="btn btn-info btn-lg px-5 py-3 fw-bold text-white w-100">
+                                <i class="fas fa-heartbeat me-2"></i> Begin Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-5 pb-3">
+        <div class="container text-center">
+            <p class="text-white-50 small mb-0">&copy; 2025 HeartGuard. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
-    </script>
+    <script> AOS.init({ duration: 800, easing: 'ease-in-out', once: true }); </script>
+    <script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
 </body>
 </html>
